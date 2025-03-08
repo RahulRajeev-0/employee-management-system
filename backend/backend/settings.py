@@ -1,8 +1,6 @@
-
-
+import os
 from pathlib import Path
 from decouple import config
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,7 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'user_auth'
 ]
 
 MIDDLEWARE = [
@@ -42,6 +42,10 @@ ROOT_URLCONF = 'backend.urls'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
 ]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 
 TEMPLATES = [
     {
@@ -63,6 +67,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
+AUTH_USER_MODEL = 'user_auth.User'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -77,9 +82,9 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ),
 }
 
 # Password validation
