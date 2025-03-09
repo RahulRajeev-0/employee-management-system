@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, Calendar } from 'lucide-react';
 
 const SignupPage = () => {
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    dob: '',
-    agreeTerms: false
+    username: '',
+    
   });
+
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -31,10 +34,10 @@ const SignupPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left side - Image for larger screens */}
-      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-800 items-center justify-center">
         <div className="max-w-md text-center text-white p-8">
-          <h1 className="text-4xl font-bold mb-6">Join Us Today</h1>
-          <p className="text-xl">Create an account to access all features and start your journey with us.</p>
+          <h1 className="text-4xl font-bold mb-6">Employee Management System</h1>
+          <p className="text-xl">Create an account to access all features.</p>
         </div>
       </div>
 
@@ -59,7 +62,7 @@ const SignupPage = () => {
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-gray-400" />
+                      
                     </div>
                     <input
                       type="text"
@@ -116,17 +119,18 @@ const SignupPage = () => {
               {/* Date of Birth */}
               <div className="mb-6">
                 <label htmlFor="dob" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth
+                  username
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    type="date"
-                    id="dob"
-                    name="dob"
-                    value={formData.dob}
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder='user'
+                    value={formData.username}
                     onChange={handleChange}
                     className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
@@ -200,28 +204,10 @@ const SignupPage = () => {
                 </div>
               </div>
 
-              {/* Terms and Conditions */}
-              <div className="mb-6">
-                <div className="flex items-start">
-                  <input
-                    id="agreeTerms"
-                    name="agreeTerms"
-                    type="checkbox"
-                    checked={formData.agreeTerms}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-                    required
-                  />
-                  <label htmlFor="agreeTerms" className="ml-2 block text-sm text-gray-700">
-                    I agree to the <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
-                  </label>
-                </div>
-              </div>
-
               {/* Signup Button */}
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Create Account
               </button>
@@ -243,25 +229,10 @@ const SignupPage = () => {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or sign up with</span>
-                </div>
+                
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Facebook
-                </button>
-              </div>
+             
             </div>
           </div>
         </div>
