@@ -1,26 +1,21 @@
 # django
 from django.contrib.auth import authenticate
+from django.db import IntegrityError
 
 # django rest framework 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed, ParseError
-
+from rest_framework.permissions import IsAuthenticated
 # from rest_framework.permissions import IsAuthenticated
 
 # serializers 
-from .serializers import UserSignUpSerializer
+from .serializers import UserSignUpSerializer, UserProfileSerializer
 
 # simple jwt 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-# user signup view (user registration view)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import IntegrityError
-from .serializers import UserSignUpSerializer
 
 # models
 from .models import User
@@ -31,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 
+# user signup view (user registration view)
 class SignUpView(APIView):
     def post(self, request):
         try:
@@ -121,3 +117,12 @@ class LoginView(APIView):
                 {'error': 'An error occurred during login'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

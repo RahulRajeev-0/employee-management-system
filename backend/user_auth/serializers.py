@@ -37,3 +37,10 @@ class UserSignUpSerializer(serializers.ModelSerializer):
                 "password": "password is not valid"
             })
 
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.ImageField(source='profile.profile_pic')
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'profile_pic']

@@ -1,25 +1,47 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { notifySuccess, notifyError, notifyWarning } from "../utils/toast";
+import { getCurrentUser, loginUser } from "../services/userService";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from '../context/AuthContext';
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate()
+  const {setUser} = useContext(AuthContext)
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
+    const requestData = new FormData()
+    requestData.append("email", email)
+    requestData.append("password", password)
+    try{
+      const response = await loginUser(requestData);
+      const userProfile = await getCurrentUser()
+      setUser(userProfile)
+      notifySuccess("Login successfully!");
+
+      navigate('/')
+
+    }catch(error){
+      if (error.response && error.response.data) {
+                notifyError(error.response.data.error || "Login failed");
+              }else{
+                  notifyError("Registration failed. Please try again later.");
+              }
+    }
     // Add your authentication logic here
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left side - Image for larger screens */}
-      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-800 items-center justify-center">
         <div className="max-w-md text-center text-white p-8">
-          <h1 className="text-4xl font-bold mb-6">Welcome Back</h1>
-          <p className="text-xl">Log in to access your dashboard and continue your journey with us.</p>
+          <h1 className="text-4xl font-bold mb-6">Employee Management System</h1>
+          <p className="text-xl">Welcome back, log in to access your dashboard.</p>
         </div>
       </div>
 
@@ -90,7 +112,7 @@ const LoginPage = () => {
               </div>
 
               {/* Remember me & Forgot password */}
-              <div className="flex items-center justify-between mb-6">
+              {/* <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <input
                     id="remember-me"
@@ -106,7 +128,7 @@ const LoginPage = () => {
                 <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">
                   Forgot password?
                 </a>
-              </div>
+              </div> */}
 
               {/* Login Button */}
               <button
@@ -127,32 +149,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            {/* Social Login */}
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Facebook
-                </button>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
