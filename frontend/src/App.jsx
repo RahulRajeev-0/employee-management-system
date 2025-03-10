@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import { AuthContextProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
+import EmployeeForm from "./pages/EmployeeForm";
 //import Dashboard from './components/Dashboard'; // You'll need to create this
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/profile" element={<ProfilePage/>} />
+                <Route path="/form" element={<EmployeeForm/>} />
             </Route>
           </Routes>
         </AuthContextProvider>
