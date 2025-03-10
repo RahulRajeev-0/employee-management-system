@@ -18,7 +18,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # models
-from .models import User
+from .models import User, Profile
 
 # logging
 import logging
@@ -123,6 +123,55 @@ class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
+        try:
+            user = request.user
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return Response(
+                {'error': 'An error occurred during fatching data'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+    def put(self, request):
         user = request.user
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if 'first_name' in request.data:
+            user.first_name = request.data['first_name']
+        
+        if 'last_name' in request.data:
+            user.last_name = request.data['last_name']
+        
+        if 'username' in request.data:
+            if User.objects.filter(username=request.data['username']).exclude(id=user.id).exists():
+                 return Response(
+                    {'error': 'Username already taken'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.username = request.data['username']
+        
+        if 'email' in request.data:
+            if User.objects.filter(email=request.data['email']).exclude(id=user.id).exists():
+                return Response(
+                    {'error': 'Email already registered'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.email = request.data['email']
+         # Handle profile picture
+        profile = Profile.objects.get(user=user)
+        if 'profile_pic' in request.FILES:
+            profile.profile_pic = request.FILES['profile_pic']
+            profile.save()
+        
+        
+        user.save()
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'profile_pic': profile.profile_pic.url if profile.profile_pic else None,
+            }, 
+            status=status.HTTP_200_OK)

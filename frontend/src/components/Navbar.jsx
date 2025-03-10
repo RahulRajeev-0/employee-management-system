@@ -43,7 +43,7 @@ const Navbar = () => {
                   
                   {profileOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg py-2 z-10">
-                      <a href="#" className="block px-4 py-2 text-black hover:bg-gray-200">My Profile</a>
+                      <a onClick={()=>navigate('/profile')} className="block px-4 py-2 text-black hover:bg-gray-200">My Profile</a>
                       <a href="#" className="block px-4 py-2 text-black hover:bg-gray-200">Settings</a>
                       <a onClick={logoutUser} className="block px-4 py-2 text-black hover:bg-gray-200">Logout</a>
                     </div>

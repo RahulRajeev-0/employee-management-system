@@ -35,6 +35,38 @@ export const getCurrentUser = async () => {
 export const updatePassword = ()=> {
   return 
 }
-export const updateUserProfile = ()=> {
-  return 
-}
+
+
+export const updateUserProfile = async (userData) => {
+  try {
+    // Create FormData to handle file uploads
+    const formData = new FormData();
+    
+    // Add text fields to FormData
+    formData.append('first_name', userData.firstName);
+    formData.append('last_name', userData.lastName);
+    formData.append('username', userData.username);
+    formData.append('email', userData.email);
+    
+    // Handle profile picture - check if it's a base64 string (newly uploaded)
+    if (userData.profilePicture && userData.profilePicture.startsWith('data:')) {
+      // Convert base64 to file
+      const response = await fetch(userData.profilePicture);
+      const blob = await response.blob();
+      const file = new File([blob], 'profile-picture.jpg', { type: 'image/jpeg' });
+      formData.append('profile_pic', file);
+    }
+    
+    // Send the request with FormData
+    const response = await api.put('/user/details/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
