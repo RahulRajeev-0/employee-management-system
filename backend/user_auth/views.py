@@ -1,6 +1,7 @@
 # django
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
+from django.contrib.auth.hashers import check_password, make_password
 
 # django rest framework 
 from rest_framework.views import APIView
@@ -134,7 +135,7 @@ class UserProfileView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
-
+    # update profile (edit profile)
     def put(self, request):
         user = request.user
         if 'first_name' in request.data:
@@ -175,3 +176,37 @@ class UserProfileView(APIView):
             'profile_pic': profile.profile_pic.url if profile.profile_pic else None,
             }, 
             status=status.HTTP_200_OK)
+    
+    
+    # update password
+    def patch(self, request):
+        user = request.user
+        
+        # Verify request data
+        if not all(k in request.data for k in ('current_password', 'new_password')):
+            return Response(
+                {'error': 'Current password and new password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check current password
+        if len(request.data['new_password']) < 8:
+            return Response(
+                {'error': 'Password should at least 8 characters'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not check_password(request.data['current_password'], user.password):
+            return Response(
+                {'error': 'Current password is incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update password
+        user.password = make_password(request.data['new_password'])
+        user.save()
+        
+        return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+
+
+

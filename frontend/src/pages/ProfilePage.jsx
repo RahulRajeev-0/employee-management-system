@@ -10,8 +10,13 @@ const ProfilePage = () => {
   const { user, setUser } = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" });
+
   const fileInputRef = useRef(null);
+  const [errors, setErrors] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // Form states
   const [formData, setFormData] = useState({
@@ -28,36 +33,82 @@ const ProfilePage = () => {
     confirmPassword: "",
   });
 
+  const validateField = (fieldName, value) => {
+    let newErrors = { ...errors };
+
+    // Validate currentPassword
+    if (fieldName === "currentPassword") {
+      if (!value) {
+        newErrors.currentPassword = "Current password is required";
+      } else if (value.length < 8) {
+        newErrors.currentPassword = "Password should be at least 8 characters";
+      } else {
+        newErrors.currentPassword = "";
+      }
+    }
+
+    // Validate newPassword
+    if (fieldName === "newPassword") {
+      if (!value) {
+        newErrors.newPassword = "New password is required";
+      } else if (value.length < 8) {
+        newErrors.newPassword = "Password should be at least 8 characters";
+      } else {
+        newErrors.newPassword = "";
+      }
+
+      // Re-check confirmPassword when newPassword changes
+      if (
+        passwordData.confirmPassword &&
+        value !== passwordData.confirmPassword
+      ) {
+        newErrors.confirmPassword = "Passwords do not match";
+      } else if (passwordData.confirmPassword) {
+        newErrors.confirmPassword = "";
+      }
+    }
+
+    // Validate confirmPassword
+    if (fieldName === "confirmPassword") {
+      if (!value) {
+        newErrors.confirmPassword = "Please confirm your password";
+      } else if (value !== passwordData.newPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      } else {
+        newErrors.confirmPassword = "";
+      }
+    }
+
+    setErrors(newErrors);
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value); // Ensure you validate the updated state
+  };
+
   // Handle profile form changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle password form changes
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 1 * 1024 * 1024) {
+        notifyError("Image size must be less than 3MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({ ...prev, profilePicture: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  
-const handleProfilePictureChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    if (file.size > 3 * 1024 * 1024) {
-      notifyError("Image size must be less than 3MB");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, profilePicture: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-
-  // Toggle edit mode
   // Toggle edit mode
   const toggleEditMode = () => {
     if (isEditing) {
@@ -79,41 +130,53 @@ const handleProfilePictureChange = (e) => {
     try {
       const updatedUser = await updateUserProfile(formData);
       setUser(updatedUser);
-      notifySuccess("Profile updated successfully!")
+      notifySuccess("Profile updated successfully!");
       // Clear message after 3 seconds
-
     } catch (error) {
       notifyWarning("Failed to update profile");
     }
-    setIsEditing(false)
+    setIsEditing(false);
   };
 
   // Submit password change
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
 
-    // Validate passwords match
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setMessage({ text: "New passwords do not match", type: "error" });
+    // Validate all password fields before submission
+    validateField("currentPassword", passwordData.currentPassword);
+    validateField("newPassword", passwordData.newPassword);
+    validateField("confirmPassword", passwordData.confirmPassword);
+
+    // Check if there are any errors
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword ||
+      passwordData.newPassword !== passwordData.confirmPassword ||
+      Object.values(errors).some((err) => err !== "")
+    ) {
+      notifyWarning("Please fix the errors before submitting");
       return;
     }
 
     try {
       await updatePassword(passwordData);
+
+      // Reset form and state on success
       setShowPasswordForm(false);
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-      setMessage({ text: "Password updated successfully!", type: "success" });
 
-      // Clear message after 3 seconds
-      setTimeout(() => {
-        setMessage({ text: "", type: "" });
-      }, 3000);
+      notifySuccess("Password updated successfully");
     } catch (error) {
-      setMessage({ text: "Failed to update password", type: "error" });
+      if (error.response && error.response.data) {
+        notifyError(error.response.data.error || "Update failed");
+      } else {
+        notifyError("Password update failed. Please try again later.");
+      }
     }
   };
 
@@ -134,15 +197,14 @@ const handleProfilePictureChange = (e) => {
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-4 border-white shadow">
                   {formData.profilePicture ? (
                     <img
-                    src={
-                      formData.profilePicture.startsWith("data:")
-                        ? formData.profilePicture
-                        : baseURL + formData.profilePicture
-                    }
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                  
+                      src={
+                        formData.profilePicture.startsWith("data:")
+                          ? formData.profilePicture
+                          : baseURL + formData.profilePicture
+                      }
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <FiUser className="text-gray-400 text-6xl" />
                   )}
@@ -297,6 +359,11 @@ const handleProfilePictureChange = (e) => {
                       className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
+                    {errors.currentPassword && (
+                      <div className="text-red-500">
+                        {errors.currentPassword}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">
@@ -310,6 +377,9 @@ const handleProfilePictureChange = (e) => {
                       className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
+                    {errors.newPassword && (
+                      <div className="text-red-500">{errors.newPassword}</div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">
@@ -323,6 +393,11 @@ const handleProfilePictureChange = (e) => {
                       className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
+                    {errors.confirmPassword && (
+                      <div className="text-red-500">
+                        {errors.confirmPassword}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-2">

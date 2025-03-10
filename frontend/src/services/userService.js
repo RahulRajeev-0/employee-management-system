@@ -32,8 +32,22 @@ export const getCurrentUser = async () => {
   }
 };
 
-export const updatePassword = ()=> {
-  return 
+export const updatePassword = async (passwordData)=> {
+  try{
+    const formData = new FormData();
+    formData.append("current_password", passwordData.currentPassword)
+    formData.append("new_password", passwordData.newPassword)
+
+    const response = await api.patch('/user/details/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return ;
+  }catch (error) {
+    console.error('Error updating user password:', error);
+    throw error;
+  }
 }
 
 
