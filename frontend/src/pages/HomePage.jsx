@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { baseURL, removeTokens } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const HomePage = () => {
   const {user, setUser} = useContext(AuthContext);
@@ -21,7 +21,7 @@ const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [profileOpen, setProfileOpen] = useState(false);
+ 
 
   // Get unique departments for filter dropdown
   const departments = ['All', ...new Set(employees.map(emp => emp.department))];
@@ -29,17 +29,9 @@ const HomePage = () => {
   // Get unique statuses for filter dropdown
   const statuses = ['All', ...new Set(employees.map(emp => emp.status))];
 
-  const logoutUser = () =>{
-    removeTokens()
-    setUser(null)
+  
 
-    navigate("/")
-  }
-
-  // Toggle profile dropdown
-  const toggleProfile = () => {
-    setProfileOpen(!profileOpen);
-  };
+ 
 
   // Handle search input change
   const handleSearchChange = (e) => {
@@ -86,33 +78,7 @@ const HomePage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Navbar */}
-      <nav className="bg-black text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold">Employee Management System</div>
-          
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <button 
-              onClick={toggleProfile}
-              className="flex items-center hover:bg-gray-800 px-2 py-1 rounded space-x-2 focus:outline-none"
-            >
-              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                <img src={baseURL + user.profile_pic}
-                className="w-full h-full object-cover rounded-full"/>
-              </div>
-              <span>{user.username}</span>
-            </button>
-            
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg py-2 z-10">
-                <a href="#" className="block px-4 py-2 text-black hover:bg-gray-200">My Profile</a>
-                <a href="#" className="block px-4 py-2 text-black hover:bg-gray-200">Settings</a>
-                <a onClick={logoutUser} className="block px-4 py-2 text-black hover:bg-gray-200">Logout</a>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+     <Navbar/>
       
       {/* Main Content */}
       <main className="flex-grow p-4">

@@ -32,3 +32,9 @@ export const getCurrentUser = async () => {
   }
 };
 
+export const updatePassword = ()=> {
+  return 
+}
+export const updateUserProfile = ()=> {
+  return 
+}
