@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import api, { removeTokens } from './api';
 import {setAccessToken, setRefreshToken} from './api'
 
